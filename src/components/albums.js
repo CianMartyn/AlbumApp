@@ -1,4 +1,4 @@
-import AlbumItem from "./components/albumItem";
+import AlbumItem from "./albumItem";
 
 // Albums functional component
 function Albums(props){

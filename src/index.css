@@ -5,9 +5,87 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #121212;  /* Dark background color */
+  color: #ffffff;  /* Light text color for visibility */
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.container {
+  font-family: 'Droid Sans', sans-serif;
+  margin: 0 auto;
+  max-width: 800px;
+  color: #ffffff;  /* Light text color for visibility */
+}
+
+.header {
+  background-color: #000000;
+  color: rgb(1, 110, 16);
+  padding: 20px;
+  text-align: center;
+}
+
+.main-content {
+  margin: 20px 0;
+  color: #ffffff;
+}
+
+.intro-section,
+.features-section {
+  background-color: #333333;  /* Dark gray background color */
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #444444;  /* Slightly lighter border color */
+}
+
+.intro-section h2,
+.features-section h2 {
+  color: #ffffff;  /* Light text color for visibility */
+}
+
+.features-section ul {
+  /* Remove default padding and margin to reset styles */
+  padding-left: 20px; /* Adjust this value as needed */
+  margin: 0;
+}
+
+.features-section li {
+  /* Align text to the left */
+  text-align: left;
+  /* Optional: Adjust margin and padding for fine-tuning the alignment */
+  margin-bottom: 5px; /* Adjust the space between list items */
+}
+
+.footer {
+  background-color: #000000;
+  color: #ffffff;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 10px 0;
+  text-align: center;
+}
+
+/* Media Query for Mobile Responsiveness */
+@media (max-width: 600px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .header {
+    padding: 15px;
+  }
+
+  .intro-section,
+  .features-section {
+    padding: 10px;
+  }
+
+  .footer {
+    padding: 5px 0;
+  }
 }
