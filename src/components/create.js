@@ -1,137 +1,98 @@
-import { useState } from "react";
-import axios from "axios";
-import Rating from "react-rating-stars-component";
+import { useState, useEffect } from "react";
+import { FormControl, Container, InputGroup, Button, Row, Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom"
+
+const CLIENT_ID = "9d32098f8274490494aa45ad596cb87f";
+const CLIENT_SECRET = "49e9a0ef1a3540c1adf44db96fa64d3e";
 
 function Create() {
-    // useState hooks to manage the state of album details
-    const [title, setTitle] = useState('');
-    const [cover, setCover] = useState('');
-    const [artist, setArtist] = useState('');
-    const [genre, setGenre] = useState('');
-    const [link, setLink] = useState('');
-    const [rating, setRating] = useState(0); // Add state for rating
+    const [searchInput, setSearchInput] = useState("");
+    const [accessToken, setAccessToken] = useState("");
+    const [albums, setAlbums] = useState([]);
 
-    const handleRatingChange = (newRating) => {
-        setRating(newRating);
-    };
-
-    // Function to handle the form submission
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        // Logging the form data to the console
-        console.log(
-            "Title: " + title +
-            " Cover: " + cover +
-            " Artist: " + artist +
-            " Genre: " + genre +
-            " Link: " + link +
-            " Rating: " + rating
-        );
-
-        // Constructing an album object from the state
-        const album = {
-            title: title,
-            cover: cover,
-            artist: artist,
-            genre: genre,
-            link: link,
-            rating: rating
+    useEffect(() => {
+        const authParameters = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
         };
 
-        // Making a POST request to the server to add the album
-        axios.post('http://localhost:4000/api/album', album)
-            .then((response) => {
-                console.log(response.data);
-                // Reset the form fields
-                setTitle('');
-                setCover('');
-                setArtist('');
-                setGenre('');
-                setLink('');
-                setRating(0); // Reset rating
-            })
-            .catch((error) => {
-                console.error("There was an error creating the album!", error);
-            });
+        fetch("https://accounts.spotify.com/api/token", authParameters)
+            .then(result => result.json())
+            .then(data => setAccessToken(data.access_token));
+    }, []);
+
+    // Search
+    async function search() {
+        console.log("Searching for " + searchInput);
+
+        const searchParameters = {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
+            }
+        };
+
+        // Fetching the album ID based on the search input
+        const albumData = await fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=album`, searchParameters)
+            .then(response => response.json())
+            .then(data => data.albums.items[0]);
+
+        if (!albumData) {
+            console.error("No album found for the search input.");
+            return;
+        }
+
+        const albumId = albumData.id;
+        console.log("Album ID: " + albumId);
+
+        // Fetch album details using the album ID
+        const albumDetails = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, searchParameters)
+            .then(response => response.json());
+
+        console.log("Album Details: ", albumDetails);
+
+        // Update the state with the fetched album data
+        setAlbums([albumDetails]);
     }
 
-    // Render the form
     return (
-        <div>
-            {/* Header for the form */}
-            <header className="header">
-                <h2>Post Album Recommendations</h2>
-            </header>
-
-            {/* Form for adding album details */}
-            <form onSubmit={handleSubmit}>
-                {/* Input field for album title */}
-                <div className="form-group">
-                    <label>Add Album Title: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={title}
-                        onChange={(e) => { setTitle(e.target.value) }}
+        <div className="Create">
+            <Container>
+                <InputGroup className="mb-3" size="lg">
+                    <FormControl
+                        placeholder="Search For Album"
+                        type="input"
+                        onKeyPress={event => {
+                            if (event.key === "Enter") {
+                                search();
+                            }
+                        }}
+                        onChange={event => setSearchInput(event.target.value)}
                     />
-                </div>
-
-                {/* Input field for album cover URL */}
-                <div className="form-group">
-                    <label>Add Album Cover: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={cover}
-                        onChange={(e) => { setCover(e.target.value) }}
-                    />
-                </div>
-
-                {/* Input field for artist name */}
-                <div className="form-group">
-                    <label>Add Artist: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={artist}
-                        onChange={(e) => { setArtist(e.target.value) }}
-                    />
-                </div>
-
-                {/* Input field for genre */}
-                <div className="form-group">
-                    <label>Add Genre: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={genre}
-                        onChange={(e) => { setGenre(e.target.value) }}
-                    />
-                </div>
-
-                {/* Input field for link to album */}
-                <div className="form-group">
-                    <label>Add Link: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={link}
-                        onChange={(e) => { setLink(e.target.value) }}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Rating: </label>
-                    <Rating
-                        count={5}
-                        value={rating}
-                        onChange={handleRatingChange}
-                        size={24}
-                        activeColor="#ffd700"
-                    />
-                </div>
-
-                {/* Submit button for the form */}
-                <div>
-                    <input type="submit" value="Add Album" />
-                </div>
-            </form>
+                    <Button onClick={search}>
+                        Search
+                    </Button>
+                </InputGroup>
+            </Container>
+            <Container>
+                <Row>
+                    {albums.map((album, i) => (
+                        <Card key={album.id} className="mb-3">
+                            <Card.Img src={album.images[0]?.url} alt={album.name} style={{ width: '300px', height: '300px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+                            <Card.Body>
+                                <Card.Title>{album.name}</Card.Title>
+                                <Card.Text>
+                                    {album.artists.map(artist => artist.name).join(", ")}
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    ))}
+                </Row>
+            </Container>
         </div>
     );
 }

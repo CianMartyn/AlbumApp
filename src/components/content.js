@@ -32,7 +32,7 @@ function Content() {
 
             {/* Footer of the component */}
             <footer className="footer">
-                <p>&copy; 2023 Album Explorer. All Rights Reserved.</p>
+                <p>&copy; 2024 Album Explorer. All Rights Reserved.</p>
             </footer>
         </div>
     );
