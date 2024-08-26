@@ -1,82 +1,69 @@
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { Container, Form, Button, Card } from "react-bootstrap";
+import ReactStars from "react-rating-stars-component";
 
-// Edit component definition
-export default function Edit() {
-    // Retrieving the 'id' parameter from the URL
-    let { id } = useParams();
-
-    // useState hooks to manage the state of the album's properties
-    const [title, setTitle] = useState('');
-    const [cover, setCover] = useState('');
-    const [artist, setArtist] = useState('');
-    const [genre, setGenre] = useState('');
-    const [link, setLink] = useState('');
-
-    // Hook to programmatically navigate to different routes
+function Edit() {
+    const { id } = useParams();  // Get the album ID from the URL
+    const [album, setAlbum] = useState(null);
+    const [newRating, setNewRating] = useState(0);
     const navigate = useNavigate();
 
-    // useEffect hook to fetch the album data when the component mounts
     useEffect(() => {
-        // Axios GET request to fetch album data based on the 'id'
-        axios.get('http://localhost:4000/api/album/' + id)
-            .then((response) => {
-                // Setting the state with the fetched album data
-                setTitle(response.data.title);
-                setCover(response.data.cover);
-                setArtist(response.data.artist);
-                setGenre(response.data.genre);
-                setLink(response.data.link);
-            })
-            .catch((error) => {
-                // Handling errors in the GET request
-                console.log(error);
-            });
-    }, [id]);
-    
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        // Constructing the updated album object
-        const album = {
-            title: title,
-            cover: cover,
-            artist: artist,
-            genre: genre,
-            link: link,
+        const storedAlbums = JSON.parse(localStorage.getItem("ratedAlbums")) || [];
+        const albumToEdit = storedAlbums.find(a => a.id === id);
+        if (albumToEdit) {
+            setAlbum(albumToEdit);
+            setNewRating(albumToEdit.rating || 0);
         }
+    }, [id]);
 
-        // Axios PUT request to update the album
-        axios.put('http://localhost:4000/api/album/' + id, album)
-            .then((res) => {
-                // Navigating to the '/publish' route on successful update
-                navigate('/publish');
-            })
-            .catch((error) => {
-                // Handling errors in the PUT request
-                console.log(error);
-            });
-    }
+    const handleSave = () => {
+        if (album) {
+            const updatedAlbum = { ...album, rating: newRating };
+            const storedAlbums = JSON.parse(localStorage.getItem("ratedAlbums")) || [];
+            const updatedAlbums = storedAlbums.map(a => a.id === id ? updatedAlbum : a);
+            localStorage.setItem("ratedAlbums", JSON.stringify(updatedAlbums));
+            navigate('/publish');  // Redirect back to the Publish page
+        }
+    };
 
-    // Rendering the form with the current album data and a submit button
+    if (!album) return <p>Loading...</p>;
+
     return (
-        <div>
-            <h2>Edit Album!</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Edit Album Title: </label>
-                    <input type="text"
-                        className="form-control"
-                        value={title}
-                        onChange={(e) => { setTitle(e.target.value) }}
+        <Container>
+            <h2>Edit Album</h2>
+            <Card className="mb-3">
+                <Card.Img 
+                    variant="top" 
+                    src={album.images[0]?.url} 
+                    alt={album.name} 
+                    style={{ width: '300px', height: '300px', objectFit: 'cover', margin: '0 auto' }} 
+                />
+                <Card.Body>
+                    <Card.Title>{album.name}</Card.Title>
+                    <Card.Text>
+                        {album.artists.map(artist => artist.name).join(", ")}
+                    </Card.Text>
+                </Card.Body>
+            </Card>
+            <Form>
+                <Form.Group controlId="albumRating">
+                    <Form.Label>Rating</Form.Label>
+                    <ReactStars
+                        count={5}
+                        value={newRating}
+                        onChange={setNewRating}
+                        size={24}
+                        activeColor="#ffd700"
                     />
-                </div>
-
-                <div>
-                    <input type="submit" value="Edit Album" />
-                </div>
-            </form>
-        </div>
+                </Form.Group>
+                <Button variant="primary" onClick={handleSave}>
+                    Save Changes
+                </Button>
+            </Form>
+        </Container>
     );
 }
+
+export default Edit;

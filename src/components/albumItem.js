@@ -1,73 +1,77 @@
-import Card from 'react-bootstrap/Card';
-import { Link } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import ListGroup from 'react-bootstrap/ListGroup';
-import axios from 'axios';
+import React, { useState } from "react";
+import { Card, Button } from "react-bootstrap";
 import ReactStars from "react-rating-stars-component";
+import { useNavigate } from "react-router-dom";
 
-const ratingChanged = (newRating) => {
-    console.log(newRating);
-  };
+function AlbumItem({ album, onDelete, onEdit }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [newRating, setNewRating] = useState(album.rating);
+    const navigate = useNavigate();
 
-function AlbumItem(props) {
-    // This component renders information about a single album
-    // It uses Bootstrap components for styling and layout
+    const handleSave = () => {
+        onEdit(album.id, newRating);
+        setIsEditing(false);
+    };
+
+    const handleEditPage = () => {
+        navigate(`/edit/${album.id}`);
+    };
 
     return (
-        // The main container with flex display to center the content
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}>
-                
-            {/* Card component from React Bootstrap to display album details */}
-            <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={props.myAlbum.cover} />
+        <Card key={album.id} className="mb-3">
+            <Card.Img
+                src={album.images[0]?.url}
+                alt={album.name}
+                style={{
+                    width: '300px',
+                    height: '300px',
+                    display: 'block',
+                    marginLeft: 'auto',
+                    marginRight: 'auto'
+                }}
+            />
+            <Card.Body>
+                <Card.Title>{album.name}</Card.Title>
+                <Card.Text>
+                    {album.artists.map(artist => artist.name).join(", ")}
+                </Card.Text>
 
-                <Card.Body>
-                    <Card.Title>{props.myAlbum.title}</Card.Title>
-                </Card.Body>
-
-                <ListGroup className="list-group-flush">
-                    <ListGroup.Item>{props.myAlbum.artist}</ListGroup.Item>
-                    <ListGroup.Item>{props.myAlbum.genre}</ListGroup.Item>
-                </ListGroup>
-
-                {/* Link to Spotify - opens in a new tab */}
-                <Card.Body>
-                    <Card.Link href={props.myAlbum.link} target="_blank">Spotify Link</Card.Link>
-                </Card.Body>
-
-                {/* Rating component */}
-                <Card.Body>
-                <ReactStars
-                    count={5}
-                    onChange={ratingChanged}
-                    size={24}
-                    activeColor="#ffd700"
-                />,   
-                </Card.Body>
-
-                {/* Link to the edit page for the album */}
-                <Link to={'/edit/' + props.myAlbum._id} className='btn btn-primary'>Edit</Link>
-
-                {/* Button to delete the album */}
-                <Button variant='danger' onClick={
-                    (e) => {
-                        e.preventDefault();
-
-                        // Axios call to delete the album from the server
-                        axios.delete('http://localhost:4000/api/album/' + props.myAlbum._id)
-                            .then((res) => {
-                                // Calling a parent component's method to refresh the album list
-                                let reload = props.Reload();
-                            })
-                            .catch(); 
-                    }
-                }>Delete</Button>
-            </Card>
-        </div>
+                {isEditing ? (
+                    <>
+                        <ReactStars
+                            count={5}
+                            value={newRating}
+                            onChange={setNewRating}
+                            size={24}
+                            activeColor="#ffd700"
+                            edit={true}
+                        />
+                        <Button variant="success" onClick={handleSave}>
+                            Save
+                        </Button>
+                        <Button variant="secondary" onClick={() => setIsEditing(false)}>
+                            Cancel
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <ReactStars
+                            count={5}
+                            value={album.rating}
+                            size={24}
+                            activeColor="#ffd700"
+                            edit={false}
+                        />
+                        <Button variant="danger" onClick={() => onDelete(album.id)}>
+                            Delete
+                        </Button>
+                        <Button variant="info" onClick={handleEditPage}>
+                            Edit Rating
+                        </Button>
+                    </>
+                )}
+            </Card.Body>
+        </Card>
     );
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FormControl, Container, InputGroup, Button, Row, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"
+import ReactStars from "react-rating-stars-component";
+import { useNavigate } from "react-router-dom";
 
 const CLIENT_ID = "9d32098f8274490494aa45ad596cb87f";
 const CLIENT_SECRET = "49e9a0ef1a3540c1adf44db96fa64d3e";
@@ -9,6 +10,8 @@ function Create() {
     const [searchInput, setSearchInput] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [albums, setAlbums] = useState([]);
+    const [rating, setRating] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const authParameters = {
@@ -24,7 +27,6 @@ function Create() {
             .then(data => setAccessToken(data.access_token));
     }, []);
 
-    // Search
     async function search() {
         console.log("Searching for " + searchInput);
 
@@ -36,7 +38,6 @@ function Create() {
             }
         };
 
-        // Fetching the album ID based on the search input
         const albumData = await fetch(`https://api.spotify.com/v1/search?q=${searchInput}&type=album`, searchParameters)
             .then(response => response.json())
             .then(data => data.albums.items[0]);
@@ -49,14 +50,28 @@ function Create() {
         const albumId = albumData.id;
         console.log("Album ID: " + albumId);
 
-        // Fetch album details using the album ID
         const albumDetails = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, searchParameters)
             .then(response => response.json());
 
         console.log("Album Details: ", albumDetails);
 
-        // Update the state with the fetched album data
         setAlbums([albumDetails]);
+    }
+
+    function handleRatingChange(newRating) {
+        setRating(newRating);
+    }
+
+    function saveAlbumWithRating(album) {
+        const ratedAlbum = { ...album, rating };
+
+        // Save to localStorage 
+        const storedAlbums = JSON.parse(localStorage.getItem("ratedAlbums")) || [];
+        storedAlbums.push(ratedAlbum);
+        localStorage.setItem("ratedAlbums", JSON.stringify(storedAlbums));
+
+        // Navigate to the Publish page
+        navigate('/publish');
     }
 
     return (
@@ -88,6 +103,15 @@ function Create() {
                                 <Card.Text>
                                     {album.artists.map(artist => artist.name).join(", ")}
                                 </Card.Text>
+                                <ReactStars
+                                    count={5}
+                                    onChange={handleRatingChange}
+                                    size={24}
+                                    activeColor="#ffd700"
+                                />
+                                <Button onClick={() => saveAlbumWithRating(album)}>
+                                    Rate and Save
+                                </Button>
                             </Card.Body>
                         </Card>
                     ))}
