@@ -10,9 +10,9 @@ function Albums({ myAlbums, setMyAlbums }) {
         localStorage.setItem("ratedAlbums", JSON.stringify(updatedAlbums));
     };
 
-    const handleEdit = (id, newRating) => {
+    const handleEdit = (id, newRating, newReview) => {
         const updatedAlbums = myAlbums.map(album => 
-            album.id === id ? { ...album, rating: newRating } : album
+            album.id === id ? { ...album, rating: newRating, review: newReview } : album
         );
         setMyAlbums(updatedAlbums);
         localStorage.setItem("ratedAlbums", JSON.stringify(updatedAlbums));

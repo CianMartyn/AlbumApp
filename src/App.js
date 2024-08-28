@@ -1,8 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Content from './components/content';
-import Footer from './components/footer';
-import Header from './components/header';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -11,7 +9,6 @@ import Create from './components/create';
 import Publish from './components/publish';
 import Edit from './components/edit';
 import React from 'react'
-import ReactDOM from 'react-dom/client'
 import './index.css'
 
 function App() {
@@ -23,8 +20,8 @@ function App() {
           <Navbar.Brand href="/">Music</Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
-            <Nav.Link href="/create">Rate</Nav.Link>
-            <Nav.Link href="/publish">Saved</Nav.Link>
+            <Nav.Link href="/create">Share</Nav.Link>
+            <Nav.Link href="/publish">Discover</Nav.Link>
           </Nav>
         </Container>
       </Navbar>

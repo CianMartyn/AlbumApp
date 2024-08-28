@@ -7,6 +7,7 @@ function Edit() {
     const { id } = useParams();  // Get the album ID from the URL
     const [album, setAlbum] = useState(null);
     const [newRating, setNewRating] = useState(0);
+    const [newReview, setNewReview] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,12 +16,13 @@ function Edit() {
         if (albumToEdit) {
             setAlbum(albumToEdit);
             setNewRating(albumToEdit.rating || 0);
+            setNewReview(albumToEdit.review || "");
         }
     }, [id]);
 
     const handleSave = () => {
         if (album) {
-            const updatedAlbum = { ...album, rating: newRating };
+            const updatedAlbum = { ...album, rating: newRating, review: newReview };
             const storedAlbums = JSON.parse(localStorage.getItem("ratedAlbums")) || [];
             const updatedAlbums = storedAlbums.map(a => a.id === id ? updatedAlbum : a);
             localStorage.setItem("ratedAlbums", JSON.stringify(updatedAlbums));
@@ -56,6 +58,16 @@ function Edit() {
                         onChange={setNewRating}
                         size={24}
                         activeColor="#ffd700"
+                    />
+                </Form.Group>
+                <Form.Group controlId="albumReview">
+                    <Form.Label>Review</Form.Label>
+                    <Form.Control 
+                        as="textarea" 
+                        rows={3} 
+                        value={newReview}
+                        onChange={(e) => setNewReview(e.target.value)}
+                        placeholder="Write your review here"
                     />
                 </Form.Group>
                 <Button variant="primary" onClick={handleSave}>

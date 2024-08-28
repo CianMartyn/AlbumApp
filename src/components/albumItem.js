@@ -1,19 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, Button } from "react-bootstrap";
-import ReactStars from "react-rating-stars-component";
 import { useNavigate } from "react-router-dom";
+import ReactStars from "react-rating-stars-component";
 
-function AlbumItem({ album, onDelete, onEdit }) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [newRating, setNewRating] = useState(album.rating);
+function AlbumItem({ album, onDelete }) {
     const navigate = useNavigate();
 
-    const handleSave = () => {
-        onEdit(album.id, newRating);
-        setIsEditing(false);
-    };
-
-    const handleEditPage = () => {
+    const handleEditClick = () => {
         navigate(`/edit/${album.id}`);
     };
 
@@ -35,41 +28,20 @@ function AlbumItem({ album, onDelete, onEdit }) {
                 <Card.Text>
                     {album.artists.map(artist => artist.name).join(", ")}
                 </Card.Text>
-
-                {isEditing ? (
-                    <>
-                        <ReactStars
-                            count={5}
-                            value={newRating}
-                            onChange={setNewRating}
-                            size={24}
-                            activeColor="#ffd700"
-                            edit={true}
-                        />
-                        <Button variant="success" onClick={handleSave}>
-                            Save
-                        </Button>
-                        <Button variant="secondary" onClick={() => setIsEditing(false)}>
-                            Cancel
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        <ReactStars
-                            count={5}
-                            value={album.rating}
-                            size={24}
-                            activeColor="#ffd700"
-                            edit={false}
-                        />
-                        <Button variant="danger" onClick={() => onDelete(album.id)}>
-                            Delete
-                        </Button>
-                        <Button variant="info" onClick={handleEditPage}>
-                            Edit Rating
-                        </Button>
-                    </>
-                )}
+                <ReactStars
+                    count={5}
+                    value={album.rating}  // Display current rating
+                    size={24}
+                    activeColor="#ffd700"
+                    edit={false}  // Stars are not editable in display mode
+                />
+                <Card.Text>{album.review || "No review added"}</Card.Text>
+                <Button variant="warning" onClick={handleEditClick}>
+                    Edit Rating & Review
+                </Button>
+                <Button variant="danger" onClick={() => onDelete(album.id)}>
+                    Delete
+                </Button>
             </Card.Body>
         </Card>
     );
